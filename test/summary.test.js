@@ -35,7 +35,7 @@ test('home match summary in Dutch, home team first', () => {
     '3′ Erling Haaland (1-0)',
     '15+2′ KSV Test (1-1)',
     '23′ Pedri (2-1)',
-    '56′ eigen doelpunt KSV Test (3-1)',
+    '56′ Own goal (3-1)',
     '60′ Erling Haaland (4-1)',
     '',
     'Doelpuntenmakers: Erling Haaland 2, Pedri 1',

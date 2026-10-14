@@ -69,7 +69,7 @@ function roundedRect(ctx, x, y, w, h, r) {
 
 function goalLabel(item) {
   if (item.team === 'them') return '';
-  if (item.kind === 'ownGoal') return 'Eigen doelpunt';
+  if (item.kind === 'ownGoal') return 'Own goal';
   if (item.kind === 'unknown') return 'Onbekend';
   return item.playerName;
 }

@@ -63,7 +63,7 @@ export function summaryModel(match, teamName = '') {
 // Label for a goal line in the text summary.
 function textLabel(item, m) {
   if (item.team === 'them') return m.them.name;
-  if (item.kind === 'ownGoal') return `eigen doelpunt ${m.them.name}`;
+  if (item.kind === 'ownGoal') return 'Own goal';
   if (item.kind === 'unknown') return `${m.us.name} (doelpuntenmaker onbekend)`;
   return item.playerName;
 }
