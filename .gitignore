@@ -1,0 +1,15 @@
+# Real squad: children's names must never be committed (the repo and the Pages site are public).
+squad.json
+
+# Local HTTPS certificates (mkcert)
+certs/
+*.pem
+
+# Data exports / backups
+exports/
+*.export.json
+
+node_modules/
+_site/
+.DS_Store
+Thumbs.db

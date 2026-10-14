@@ -1,0 +1,16 @@
+{
+  "name": "football-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Football Manager: sideline match timer and scorer PWA for a U11 football team.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "serve": "node tools/serve.mjs",
+    "serve:https": "node tools/serve.mjs --https",
+    "icons": "pwsh -NoProfile -File tools/make-icons.ps1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

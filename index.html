@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Football Manager</title>
+  <meta name="description" content="Sideline match timer and scorer for a youth football team.">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Football">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon-64.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+  <link rel="preload" href="fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <main id="app">
+    <section id="view-loading" class="view view-center">
+      <p>Loading…</p>
+      <noscript>Football Manager needs JavaScript.</noscript>
+    </section>
+
+    <!-- Match selection -->
+    <section id="view-selection" class="view" hidden>
+      <header class="bar">
+        <img class="club-logo" src="icons/club-logo.png" alt="" width="30" height="56">
+        <h1>Football Manager</h1>
+        <button id="sel-settings" class="icon-btn" aria-label="Settings">⚙︎</button>
+      </header>
+      <div class="scroll">
+        <p id="sel-team" class="team-name"></p>
+        <label class="field">
+          <span>Opponent</span>
+          <input id="sel-opponent" type="text" autocomplete="off" autocapitalize="words" placeholder="Optional">
+        </label>
+        <div class="field">
+          <span>Venue</span>
+          <div class="segmented" role="group" aria-label="Venue">
+            <button id="sel-home" class="btn" type="button" aria-pressed="true">Home</button>
+            <button id="sel-away" class="btn" type="button" aria-pressed="false">Away</button>
+          </div>
+        </div>
+        <div class="sel-tools">
+          <span id="sel-count" class="muted"></span>
+          <button id="sel-all" class="btn btn-small">All</button>
+          <button id="sel-none" class="btn btn-small">None</button>
+        </div>
+        <ul id="sel-players" class="player-grid"></ul>
+        <div id="sel-empty" class="empty" hidden>
+          <p>No squad yet. Import your squad file once on this device.</p>
+          <button id="sel-import" class="btn btn-primary">Import squad</button>
+        </div>
+      </div>
+      <footer class="actions">
+        <button id="sel-start" class="btn btn-primary btn-xl">Start match</button>
+      </footer>
+    </section>
+
+    <!-- Live match -->
+    <section id="view-live" class="view" hidden>
+      <header class="bar live-bar">
+        <span id="live-quarter" class="quarter">Q1</span>
+        <span id="live-badges" class="badges"></span>
+        <button id="live-settings" class="icon-btn" aria-label="Settings">⚙︎</button>
+      </header>
+      <div class="clock-wrap">
+        <div id="live-clock" class="clock">00:00</div>
+        <div id="live-overtime" class="overtime" hidden></div>
+        <div id="live-status" class="status-line"></div>
+      </div>
+      <div class="scoreboard">
+        <div id="score-left-side" class="side left"><span id="score-left-name" class="team"></span><span id="score-left" class="goals">0</span></div>
+        <span class="dash">–</span>
+        <div id="score-right-side" class="side right"><span id="score-right" class="goals">0</span><span id="score-right-name" class="team"></span></div>
+      </div>
+      <ol id="goal-list" class="goal-list"></ol>
+      <footer class="controls">
+        <div class="row">
+          <button id="btn-goal" class="btn btn-goal btn-xl">+ Goal</button>
+          <button id="btn-opp-goal" class="btn btn-opp">+ Opponent</button>
+        </div>
+        <div class="row">
+          <button id="btn-undo" class="btn btn-secondary">Undo goal</button>
+          <button id="btn-end" class="btn btn-danger">End Q1</button>
+          <button id="btn-share" class="btn btn-share" hidden>Share result</button>
+        </div>
+        <button id="btn-main" class="btn btn-primary btn-xl btn-main">Start Q1</button>
+      </footer>
+    </section>
+
+    <!-- Settings -->
+    <section id="view-settings" class="view" hidden>
+      <header class="bar">
+        <button id="set-back" class="btn btn-small">‹ Back</button>
+        <h1>Settings</h1>
+        <span></span>
+      </header>
+      <div class="scroll settings">
+        <section class="card">
+          <h2>Match format</h2>
+          <p class="muted">Applies to the next match.</p>
+          <label class="field"><span>Quarters</span><input id="set-quarters" type="number" inputmode="numeric" min="1" max="8"></label>
+          <label class="field"><span>Quarter length (minutes)</span><input id="set-qmin" type="number" inputmode="numeric" min="1" max="60"></label>
+          <label class="field"><span>Substitution reminder at (m:ss, 0 = off)</span><input id="set-reminder" type="text" inputmode="numeric" placeholder="7:30"></label>
+          <button id="set-save" class="btn btn-primary">Save</button>
+          <p id="set-error" class="error" hidden></p>
+        </section>
+
+        <section class="card">
+          <h2>Squad</h2>
+          <p id="set-squad-summary" class="muted"></p>
+          <label class="btn btn-secondary file-btn">Import squad file…<input id="set-squad-file" type="file" accept=".json,application/json,text/plain" hidden></label>
+          <label class="field"><span>…or paste JSON / one player per line ("7 Lars")</span><textarea id="set-squad-text" rows="5"></textarea></label>
+          <button id="set-squad-paste" class="btn btn-secondary">Import pasted squad</button>
+          <pre id="set-squad-error" class="error" hidden></pre>
+        </section>
+
+        <section class="card">
+          <h2>Alerts</h2>
+          <p class="muted">Turn the volume up. The beep also plays with the silent switch on (iOS 16.4+).</p>
+          <button id="set-test-alert" class="btn btn-secondary">Test beep + flash</button>
+        </section>
+
+        <section class="card">
+          <h2>Current match</h2>
+          <p id="set-match-info" class="muted"></p>
+          <button id="set-abandon" class="btn btn-danger">Abandon match</button>
+        </section>
+
+        <section class="card">
+          <h2>Debug</h2>
+          <label class="field"><span>Time speed (new matches only)</span>
+            <select id="set-debug">
+              <option value="1">Off (real time)</option>
+              <option value="10">10× faster</option>
+              <option value="60">60× faster</option>
+            </select>
+          </label>
+          <h3>Diagnostics</h3>
+          <pre id="set-diag" class="diag"></pre>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <!-- Goal picker -->
+  <div id="picker" class="sheet" hidden>
+    <div class="sheet-body">
+      <h2 id="picker-title">Goal</h2>
+      <ul id="picker-players" class="player-grid"></ul>
+      <div class="row">
+        <button id="picker-own" class="btn btn-secondary">Own goal (opponent)</button>
+        <button id="picker-unknown" class="btn btn-secondary">Unknown scorer</button>
+      </div>
+      <button id="picker-cancel" class="btn btn-small btn-cancel">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Match summary for the parents (Dutch) -->
+  <div id="share" class="sheet" hidden>
+    <div class="sheet-body">
+      <h2>Match summary</h2>
+      <textarea id="share-text" class="share-text" rows="14" readonly></textarea>
+      <div class="row">
+        <button id="share-copy" class="btn btn-primary">Copy</button>
+        <button id="share-native" class="btn btn-share" hidden>Share…</button>
+      </div>
+      <button id="share-close" class="btn btn-small btn-cancel">Close</button>
+    </div>
+  </div>
+
+  <!-- Confirm dialog -->
+  <div id="dialog" class="sheet" hidden>
+    <div class="sheet-body dialog">
+      <h2 id="dialog-title"></h2>
+      <p id="dialog-message"></p>
+      <div class="row">
+        <button id="dialog-cancel" class="btn btn-secondary">Cancel</button>
+        <button id="dialog-ok" class="btn btn-danger">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="flash" class="flash" hidden role="alert">
+    <div class="flash-title"></div>
+    <div class="flash-detail"></div>
+    <div class="flash-hint">Tap to dismiss</div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <div id="update-banner" class="update-banner" hidden>
+    <span>Update available</span>
+    <button id="update-reload" class="btn btn-small btn-primary">Reload</button>
+  </div>
+  <div class="rotate">Turn your phone to portrait</div>
+</body>
+</html>

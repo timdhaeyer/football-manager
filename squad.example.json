@@ -1,0 +1,17 @@
+{
+  "team": "My Club U11",
+  "players": [
+    { "id": "p01", "name": "Thibaut Courtois", "number": 1 },
+    { "id": "p02", "name": "Virgil van Dijk", "number": 2 },
+    { "id": "p03", "name": "Rúben Dias", "number": 3 },
+    { "id": "p04", "name": "William Saliba", "number": 4 },
+    { "id": "p05", "name": "Joshua Kimmich", "number": 5 },
+    { "id": "p06", "name": "Rodri", "number": 6 },
+    { "id": "p07", "name": "Lamine Yamal", "number": 7 },
+    { "id": "p08", "name": "Pedri", "number": 8 },
+    { "id": "p09", "name": "Erling Haaland", "number": 9 },
+    { "id": "p10", "name": "Florian Wirtz", "number": 10 },
+    { "id": "p11", "name": "Kylian Mbappé", "number": 11 },
+    { "id": "p12", "name": "Jude Bellingham", "number": 12 }
+  ]
+}
