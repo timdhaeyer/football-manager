@@ -74,9 +74,8 @@ async function shareText() {
 
 async function shareImage() {
   if (!cardFile) return;
-  const data = { files: [cardFile], text: $('share-text').value };
+  const data = { files: [cardFile] };
   if (navigator.canShare?.(data)) return share(data);
-  if (navigator.canShare?.({ files: [cardFile] })) return share({ files: [cardFile] });
   // No file sharing (e.g. desktop browser): download the image instead.
   const a = document.createElement('a');
   a.href = cardUrl;

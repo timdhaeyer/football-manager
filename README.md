@@ -17,8 +17,7 @@ GitHub Pages, data in IndexedDB on the phone.
   (the scoreboard lists the home team first; a HOME/AWAY badge shows during the match).
 - **Match summary for the parents** (in Dutch) at full time: a **result card image** (crests, big score, goals
   under each team) and a text version (score, goals with minute and running score, scorers). *Share image* sends
-  the card (with the text as caption) via the iOS share sheet, e.g. to WhatsApp; *Share text* / *Copy text* for
-  text only.
+    only the card via the iOS share sheet, e.g. to WhatsApp; *Share text* / *Copy text* for the text.
 - Recovers after the app is killed: the timer is derived from timestamps stored in IndexedDB on every change.
 - Keeps the screen on (Screen Wake Lock), works offline (service worker), club colours and crest.
 
