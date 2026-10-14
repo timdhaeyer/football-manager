@@ -27,6 +27,7 @@ const ASSETS = [
   'js/ui/dom.js',
   'js/ui/goal-picker.js',
   'js/ui/live.js',
+  'js/ui/result-card.js',
   'js/ui/selection.js',
   'js/ui/settings.js',
   'js/ui/share.js',

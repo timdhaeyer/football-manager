@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { addGoal, applyTimerAction, createMatch } from '../js/core/match.js';
-import { matchSummaryNl } from '../js/core/summary.js';
+import { initials, matchSummaryNl, summaryModel } from '../js/core/summary.js';
 
 const MIN = 60_000;
 const haaland = { id: 'p09', name: 'Erling Haaland' };
@@ -28,7 +28,7 @@ function playedMatch(venue) {
 test('home match summary in Dutch, home team first', () => {
   const text = matchSummaryNl(playedMatch('home'), 'SV Sottegem');
   assert.equal(text, [
-    '⚽ SV Sottegem – KSV Test: 4-1',
+    '⚽ SV Sottegem 4-1 KSV Test',
     'Eindstand · thuiswedstrijd · zaterdag 17 oktober 2026',
     '',
     'Doelpunten:',
@@ -38,17 +38,41 @@ test('home match summary in Dutch, home team first', () => {
     '56′ eigen doelpunt KSV Test (3-1)',
     '60′ Erling Haaland (4-1)',
     '',
-    'Stand na elk kwart: K1 1-1 · K2 2-1 · K3 2-1 · K4 4-1',
     'Doelpuntenmakers: Erling Haaland 2, Pedri 1',
   ].join('\n'));
 });
 
 test('away match lists the opponent first everywhere', () => {
   const text = matchSummaryNl(playedMatch('away'), 'SV Sottegem');
-  assert.match(text, /^⚽ KSV Test – SV Sottegem: 1-4\n/);
+  assert.match(text, /^⚽ KSV Test 1-4 SV Sottegem\n/);
   assert.match(text, /uitwedstrijd/);
   assert.match(text, /3′ Erling Haaland \(0-1\)/);
-  assert.match(text, /K1 1-1 · K2 1-2 · K3 1-2 · K4 1-4/);
+  assert.doesNotMatch(text, /kwart/);
+});
+
+test('card model puts goals in home/away columns with running score', () => {
+  const m = summaryModel(playedMatch('away'), 'SV Sottegem');
+  assert.equal(m.home.name, 'KSV Test');
+  assert.equal(m.away_.name, 'SV Sottegem');
+  assert.equal(m.away_.mine, true);
+  assert.deepEqual([m.home.score, m.away_.score], [1, 4]);
+  assert.deepEqual(m.home.goals.map((g) => g.minute), ['15+2′']);
+  assert.deepEqual(m.away_.goals.map((g) => [g.minute, g.kind, g.playerName]), [
+    ['3′', 'player', 'Erling Haaland'],
+    ['23′', 'player', 'Pedri'],
+    ['56′', 'ownGoal', null],
+    ['60′', 'player', 'Erling Haaland'],
+  ]);
+  assert.deepEqual(m.timeline.at(-1), { minute: '60′', team: 'us', kind: 'player', playerName: 'Erling Haaland', home: 1, away: 4 });
+  assert.equal(m.statusNl, 'Eindstand');
+});
+
+test('opponent initials for the card', () => {
+  assert.equal(initials('Olsa Brakel B'), 'OB');
+  assert.equal(initials('KSV Test'), 'KT');
+  assert.equal(initials('Eendracht'), 'E');
+  assert.equal(initials('K. Olsa Brakel'), 'OB');
+  assert.equal(initials(''), '?');
 });
 
 test('unfinished match without goals or names', () => {
@@ -56,7 +80,7 @@ test('unfinished match without goals or names', () => {
   m = applyTimerAction(m, { type: 'start' }, 0);
   m = addGoal(m, { team: 'us', kind: 'unknown' }, { quarter: 1, elapsedMs: MIN, at: 1 });
   const text = matchSummaryNl(m);
-  assert.match(text, /^⚽ Wij – Tegenstander: 1-0\nTussenstand/);
+  assert.match(text, /^⚽ Wij 1-0 Tegenstander\nTussenstand/);
   assert.match(text, /2′ Wij \(doelpuntenmaker onbekend\) \(1-0\)/);
   assert.doesNotMatch(text, /Stand na elk kwart|Doelpuntenmakers/);
   const empty = matchSummaryNl(createMatch({ createdAt: CREATED, opponent: 'X' }), 'Y');

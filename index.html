@@ -162,11 +162,13 @@
   <div id="share" class="sheet" hidden>
     <div class="sheet-body">
       <h2>Match summary</h2>
-      <textarea id="share-text" class="share-text" rows="14" readonly></textarea>
+      <img id="share-card" class="share-card" alt="Result card" hidden>
       <div class="row">
-        <button id="share-copy" class="btn btn-primary">Copy</button>
-        <button id="share-native" class="btn btn-share" hidden>Share…</button>
+        <button id="share-image" class="btn btn-share">Share image</button>
+        <button id="share-native" class="btn btn-secondary" hidden>Share text</button>
       </div>
+      <textarea id="share-text" class="share-text" rows="7" readonly></textarea>
+      <button id="share-copy" class="btn btn-primary">Copy text</button>
       <button id="share-close" class="btn btn-small btn-cancel">Close</button>
     </div>
   </div>
