@@ -17,7 +17,7 @@ export function initLive(appRef) {
   $('btn-opp-goal').addEventListener('click', () => app.recordGoal({ team: 'them' }, app.captureTime()));
   $('btn-undo').addEventListener('click', () => app.undoGoal());
   endButton = twoStep($('btn-end'), {
-    confirmLabel: () => `Tap again: end Q${app.state.match?.timer.quarter ?? ''}`,
+    confirmLabel: 'Tap again',
     onConfirm: () => app.timerAction('endQuarter'),
   });
 }
@@ -95,7 +95,7 @@ export function renderLive(d) {
   $('btn-share').hidden = !finished;
   end.classList.toggle('btn-end-hidden', !inPlay);
   end.disabled = !inPlay;
-  if (!endButton.isArmed()) setText('btn-end', d.isLastQuarter ? `End Q${q} (full time)` : `End Q${q}`);
+  if (!endButton.isArmed()) setText('btn-end', d.isLastQuarter ? 'End match' : `End Q${q}`);
   const canGoal = d.phase !== PHASE.IDLE;
   $('btn-goal').disabled = !canGoal;
   $('btn-opp-goal').disabled = !canGoal;

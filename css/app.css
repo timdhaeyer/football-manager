@@ -260,8 +260,21 @@ h3 { font-size: 1rem; margin: 12px 0 4px; }
 .goal-list .at { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.95rem; white-space: nowrap; }
 .goal-list .them { color: var(--muted); }
 
-.controls { display: flex; flex-direction: column; gap: 10px; }
-.controls .btn-goal { flex: 2; }
+/* Controls grid. Tall phones: 3 rows; short phones (SE): Pause/Resume joins the Undo/End row. */
+.controls {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-areas:
+    "goal goal goal goal goal opp opp opp"
+    "undo undo undo undo end end end end"
+    "main main main main main main main main";
+  gap: 10px;
+}
+#btn-goal { grid-area: goal; }
+#btn-opp-goal { grid-area: opp; white-space: nowrap; font-size: 1.05rem; padding: 8px 6px; }
+#btn-undo { grid-area: undo; }
+#btn-end, #btn-share { grid-area: end; }
+#btn-main { grid-area: main; }
 .controls .btn-end-hidden { visibility: hidden; }
 .btn-main.pause { background: #fff; color: #000; }
 
@@ -392,9 +405,26 @@ h3 { font-size: 1rem; margin: 12px 0 4px; }
   }
 }
 
-/* Small phones (iPhone SE): tighten vertical space. */
+/* Small phones (iPhone SE, 375×667): fit controls in two rows and tighten vertical space. */
 @media (max-height: 700px) {
-  .btn-xl { min-height: 72px; font-size: 1.4rem; }
-  .side .goals { font-size: 2.4rem; }
-  .view { gap: 8px; }
+  .view { gap: 6px; padding-top: 4px; padding-bottom: 8px; }
+  .bar { min-height: 40px; }
+  .live-bar .quarter { font-size: 1.35rem; }
+  .badge { font-size: 0.8rem; padding: 3px 7px; }
+  .clock { font-size: clamp(4.5rem, 27vw, 6.5rem); }
+  .overtime { font-size: 1.5rem; }
+  .status-line { font-size: 1rem; min-height: 0; }
+  .scoreboard { padding: 4px 10px; }
+  .side .goals { font-size: 2.2rem; }
+  .side .team { font-size: 0.95rem; }
+  .goal-list li { padding: 4px; font-size: 1rem; }
+  .btn-xl { min-height: 64px; font-size: 1.4rem; }
+  .controls {
+    gap: 8px;
+    grid-template-areas:
+      "goal goal goal goal goal opp opp opp"
+      "undo undo end end main main main main";
+  }
+  #btn-undo, #btn-end, #btn-share { min-height: 64px; padding: 6px 4px; font-size: 0.95rem; line-height: 1.15; }
+  #btn-main { font-size: 1.35rem; }
 }
