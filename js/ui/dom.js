@@ -78,7 +78,7 @@ export function playerButton(p, { pressed, onClick }) {
   return el(
     'button',
     props,
-    el('span', { class: 'num', textContent: p.number != null ? String(p.number) : '' }),
+    p.number != null ? el('span', { class: 'num', textContent: String(p.number) }) : null,
     el('span', { textContent: p.name }),
   );
 }
