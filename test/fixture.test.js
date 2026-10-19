@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  FixtureError, createFixture, kickoffFromInputs, kickoffToInputs, splitFixtures, todayFixture, validateFixture,
+  FixtureError, canStart, createFixture, kickoffFromInputs, kickoffToInputs, splitFixtures, todayFixture, validateFixture,
 } from '../js/core/fixture.js';
 
 const local = (y, mo, d, h = 10, mi = 0) => new Date(y, mo - 1, d, h, mi).getTime();
@@ -46,4 +46,12 @@ test('finds today\'s fixture around midnight', () => {
   assert.equal(todayFixture(fixtures, local(2026, 10, 25, 23, 59))?.id, 'sat');
   assert.equal(todayFixture(fixtures, local(2026, 10, 24, 23, 59)), null);
   assert.equal(todayFixture(fixtures, local(2026, 10, 26, 0, 0)), null);
+});
+
+test('can be started from 1 hour before kick-off until the end of that day', () => {
+  const f = createFixture({ kickoffAt: local(2026, 10, 25, 10) });
+  assert.equal(canStart(f, local(2026, 10, 25, 8, 59)), false);
+  assert.equal(canStart(f, local(2026, 10, 25, 9, 0)), true);
+  assert.equal(canStart(f, local(2026, 10, 25, 12)), true);
+  assert.equal(canStart(f, local(2026, 10, 26, 9)), false);
 });

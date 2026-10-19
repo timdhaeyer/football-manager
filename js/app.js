@@ -11,7 +11,7 @@ import { reacquireWakeLock, setWakeLockWanted } from './platform/wakelock.js';
 import { installLifecycle } from './platform/lifecycle.js';
 import { VERSION } from './version.js';
 import { $, confirmDialog, toast } from './ui/dom.js';
-import { initSelection, loadFixture, renderSelection, resetSelection } from './ui/selection.js';
+import { initSelection, renderSelection, resetSelection } from './ui/selection.js';
 import { initLive, invalidateLive, renderLive } from './ui/live.js';
 import { initGoalPicker, openGoalPicker } from './ui/goal-picker.js';
 import { initSettings, renderSettings } from './ui/settings.js';
@@ -217,11 +217,6 @@ async function deleteFixture(id) {
   state.fixtures = state.fixtures.filter((f) => f.id !== id);
 }
 
-function prepareFixture(fixture) {
-  loadFixture(fixture);
-  show('selection');
-}
-
 async function deleteMatch(id) {
   await store.deleteMatch(id);
   log('match deleted');
@@ -358,7 +353,6 @@ const app = {
   saveTeamName,
   saveFixture,
   deleteFixture,
-  prepareFixture,
   listMatches: () => store.listMatches(),
   getMatch: (id) => store.getMatch(id),
   deleteMatch,

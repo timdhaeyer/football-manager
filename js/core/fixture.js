@@ -2,6 +2,7 @@
 import { newId } from './match.js';
 
 export const FIXTURE_SCHEMA_VERSION = 1;
+export const START_WINDOW_MS = 60 * 60 * 1000;
 
 export class FixtureError extends Error {}
 
@@ -55,4 +56,9 @@ export function splitFixtures(fixtures, now) {
 export function todayFixture(fixtures, now) {
   const today = startOfDay(now);
   return splitFixtures(fixtures, now).upcoming.find((f) => startOfDay(f.kickoffAt) === today) ?? null;
+}
+
+// Startable from 1 hour before kick-off until the end of that day.
+export function canStart(f, now) {
+  return now >= f.kickoffAt - START_WINDOW_MS && startOfDay(now) === startOfDay(f.kickoffAt);
 }

@@ -21,8 +21,9 @@ GitHub Pages, data in IndexedDB on the phone.
 - Recovers after the app is killed: the timer is derived from timestamps stored in IndexedDB on every change.
 - Keeps the screen on (Screen Wake Lock), works offline (service worker), club colours and crest.
 - **Tabs** (hidden during a match): _Match_, _Calendar_, _History_, _Squad_.
-- **Calendar**: plan matches ahead (opponent, home/away, date + kick-off, selection). On match day a _Today_ banner
-  loads it into the match screen; starting the match removes it from the calendar.
+- **Calendar**: plan matches ahead (opponent, home/away, date + kick-off, selection). From 1 hour before kick-off a
+  _Start_ button opens the match directly (or use the _Today_ banner on the match screen to adjust it first);
+  starting the match removes it from the calendar.
 - **History**: all finished matches (also those played before this feature), newest first. Tap one to reopen the
   result card, share it again or delete it. Swipe a row left to reveal a _Delete_ button (like Mail).
 - **Squad**: edit the team name, add / rename / renumber players or mark them inactive. Players are never deleted

@@ -1,5 +1,5 @@
-// Calendar tab: plan matches ahead (opponent, venue, kick-off, selection) and prepare one on match day.
-import { createFixture, kickoffFromInputs, kickoffToInputs, splitFixtures, validateFixture } from '../core/fixture.js';
+// Calendar tab: plan matches ahead (opponent, venue, kick-off, selection) and start one on match day.
+import { canStart, createFixture, kickoffFromInputs, kickoffToInputs, splitFixtures, validateFixture } from '../core/fixture.js';
 import { sortPlayers } from '../core/squad.js';
 import { $, el, playerButton, toast, twoStep } from './dom.js';
 
@@ -25,6 +25,8 @@ export function initFixtures(appRef) {
   $('fx-save').addEventListener('click', save);
   $('fx-cancel').addEventListener('click', close);
   $('fixture-sheet').addEventListener('click', (e) => { if (e.target.id === 'fixture-sheet') close(); });
+  // Re-render so the Start button appears once the start window opens.
+  setInterval(() => { if (app.state.view === 'fixtures' && !editing) renderFixtures(); }, 30_000);
   deleteButton = twoStep($('fx-delete'), {
     confirmLabel: 'Tap again to delete',
     onConfirm: async () => {
@@ -41,14 +43,15 @@ function activePlayers() {
 }
 
 export function renderFixtures() {
-  const { upcoming, past } = splitFixtures(app.state.fixtures, Date.now());
+  const now = Date.now();
+  const { upcoming, past } = splitFixtures(app.state.fixtures, now);
   $('fix-empty').hidden = upcoming.length > 0;
-  $('fix-list').replaceChildren(...upcoming.map((f) => row(f, false)));
+  $('fix-list').replaceChildren(...upcoming.map((f) => row(f, false, canStart(f, now))));
   $('fix-past-title').hidden = past.length === 0;
-  $('fix-past').replaceChildren(...past.map((f) => row(f, true)));
+  $('fix-past').replaceChildren(...past.map((f) => row(f, true, false)));
 }
 
-function row(f, past) {
+function row(f, past, startable) {
   const active = new Set(activePlayers().map((p) => p.id));
   const count = f.selection.filter((id) => active.has(id)).length;
   return el(
@@ -62,8 +65,16 @@ function row(f, past) {
         el('span', { class: 'sub', textContent: `${WHEN.format(f.kickoffAt)} · ${f.venue === 'away' ? 'AWAY' : 'HOME'} · ${count} players` }),
       ),
     ),
-    el('button', { class: 'btn btn-small btn-primary', type: 'button', textContent: 'Prepare', on: { click: () => app.prepareFixture(f) } }),
+    startable
+      ? el('button', { class: 'btn btn-small btn-primary', type: 'button', textContent: 'Start', on: { click: () => start(f) } })
+      : null,
   );
+}
+
+async function start(f) {
+  const active = new Set(activePlayers().map((p) => p.id));
+  await app.startMatch({ opponent: f.opponent, venue: f.venue, selection: f.selection.filter((id) => active.has(id)), fixtureId: f.id });
+  toast(app.state.match.debug ? `Debug match (${app.state.match.debug.speed}×)` : 'Match ready');
 }
 
 function openEditor(f) {
