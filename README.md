@@ -24,7 +24,7 @@ GitHub Pages, data in IndexedDB on the phone.
 - **Calendar**: plan matches ahead (opponent, home/away, date + kick-off, selection). On match day a _Today_ banner
   loads it into the match screen; starting the match removes it from the calendar.
 - **History**: all finished matches (also those played before this feature), newest first. Tap one to reopen the
-  result card, share it again or delete it.
+  result card, share it again or delete it. Swipe a row left to reveal a _Delete_ button (like Mail).
 - **Squad**: edit the team name, add / rename / renumber players or mark them inactive. Players are never deleted
   and their ids never change; past goals keep the name the scorer had at the time.
 

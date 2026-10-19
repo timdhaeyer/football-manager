@@ -241,6 +241,24 @@ h3 { font-size: 1rem; margin: 12px 0 4px; }
 .row-score.D { color: var(--muted); }
 .field.grow { flex: 1; min-width: 0; }
 
+.swipe { position: relative; overflow: hidden; border-radius: var(--radius); }
+.swipe .row-main { position: relative; z-index: 1; touch-action: pan-y; }
+.swipe-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 96px;
+  appearance: none;
+  border: 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--danger);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+}
+.swipe:not(.revealed) .swipe-delete { visibility: hidden; }
+
 .inactive summary { color: var(--muted); font-weight: 700; padding: 8px 0; }
 .inactive .player-btn { opacity: 0.6; }
 
