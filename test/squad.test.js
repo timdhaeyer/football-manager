@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { parseSquad, sortPlayers, SquadError } from '../js/core/squad.js';
+import { newPlayerId, parseSquad, sortPlayers, SquadError, validatePlayer } from '../js/core/squad.js';
 
 test('parses the example squad file', () => {
   const text = readFileSync(new URL('../squad.example.json', import.meta.url), 'utf8');
@@ -36,4 +36,17 @@ test('rejects duplicates, missing names, bad numbers and bad JSON', () => {
 test('sorts by shirt number then name', () => {
   const sorted = sortPlayers([{ name: 'B' }, { name: 'A', number: 9 }, { name: 'C', number: 2 }, { name: 'A' }]);
   assert.deepEqual(sorted.map((p) => p.name), ['C', 'A', 'A', 'B']);
+});
+
+test('new player ids never collide, also with inactive players', () => {
+  assert.equal(newPlayerId('Noé', new Set()), 'p-noe');
+  assert.equal(newPlayerId('Noé', new Set(['p-noe', 'p-noe-2'])), 'p-noe-3');
+});
+
+test('validates a single player edit', () => {
+  assert.deepEqual(validatePlayer({ name: ' Lars ', number: '7' }), { name: 'Lars', number: 7 });
+  assert.deepEqual(validatePlayer({ name: 'Lars', number: '' }), { name: 'Lars', number: null });
+  assert.throws(() => validatePlayer({ name: ' ', number: null }), /Name is missing/);
+  assert.throws(() => validatePlayer({ name: 'X', number: '100' }), /0-99/);
+  assert.throws(() => validatePlayer({ name: 'lars' }, [{ name: 'Lars' }]), /already/);
 });

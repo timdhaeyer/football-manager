@@ -14,6 +14,7 @@ export function initSettings(appRef) {
   app = appRef;
   $('set-back').addEventListener('click', () => app.show(app.state.match ? 'live' : 'selection'));
   $('set-save').addEventListener('click', save);
+  $('set-manage-squad').addEventListener('click', () => app.show('squad'));
   $('set-squad-file').addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -50,6 +51,7 @@ export function renderSettings() {
     ? `${live ? 'Live' : 'Finished'} ${match.venue === 'away' ? 'away' : 'home'} match${match.opponent ? ` vs ${match.opponent}` : ''}, created ${new Date(match.createdAt).toLocaleString()}.`
     : 'No active match.';
   $('set-abandon').disabled = !match;
+  $('set-manage-squad').hidden = Boolean(match);
 
   const debug = $('set-debug');
   debug.value = String(settings.debugSpeed);

@@ -14,6 +14,30 @@ function slug(name) {
     .replace(/^-|-$/g, '') || 'player';
 }
 
+// existingIds should include inactive players: their ids stay referenced by match history.
+export function newPlayerId(name, existingIds) {
+  const base = `p-${slug(name)}`;
+  let id = base;
+  for (let n = 2; existingIds.has(id); n++) id = `${base}-${n}`;
+  return id;
+}
+
+// Validates a single player edit; others = the other active players. Returns { name, number }.
+export function validatePlayer({ name, number }, others = []) {
+  const errors = [];
+  const trimmed = String(name ?? '').trim();
+  if (!trimmed) errors.push('Name is missing.');
+  let num = number == null || String(number).trim() === '' ? null : Number(number);
+  if (num != null && !(Number.isInteger(num) && num >= 0 && num <= 99)) {
+    errors.push('Shirt number must be 0-99.');
+    num = null;
+  }
+  const lower = trimmed.toLowerCase();
+  if (trimmed && others.some((p) => p.name.trim().toLowerCase() === lower)) errors.push(`There is already a player called "${trimmed}".`);
+  if (errors.length) throw new SquadError(errors.join('\n'));
+  return { name: trimmed, number: num };
+}
+
 function parseText(text) {
   const players = [];
   for (const line of text.split(/\r?\n/)) {
@@ -57,9 +81,7 @@ export function parseSquad(input) {
     if (id) {
       if (ids.has(id)) errors.push(`Duplicate id "${id}".`);
     } else {
-      const base = `p-${slug(name)}`;
-      id = base;
-      for (let n = 2; ids.has(id); n++) id = `${base}-${n}`;
+      id = newPlayerId(name, ids);
     }
     ids.add(id);
     return { id, name, number, active: true };

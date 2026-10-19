@@ -11,21 +11,27 @@ import { reacquireWakeLock, setWakeLockWanted } from './platform/wakelock.js';
 import { installLifecycle } from './platform/lifecycle.js';
 import { VERSION } from './version.js';
 import { $, confirmDialog, toast } from './ui/dom.js';
-import { initSelection, renderSelection, resetSelection } from './ui/selection.js';
+import { initSelection, loadFixture, renderSelection, resetSelection } from './ui/selection.js';
 import { initLive, invalidateLive, renderLive } from './ui/live.js';
 import { initGoalPicker, openGoalPicker } from './ui/goal-picker.js';
 import { initSettings, renderSettings } from './ui/settings.js';
 import { initShare, openShare } from './ui/share.js';
+import { initFixtures, renderFixtures } from './ui/fixtures.js';
+import { initHistory, renderHistory } from './ui/history.js';
+import { initTeam, renderTeam } from './ui/team.js';
 
 const RENDER_INTERVAL_MS = 200;
 const DEFAULT_SETTINGS = { ...DEFAULT_CONFIG, debugSpeed: 1, debugEpochWall: null };
-const VIEWS = ['loading', 'selection', 'live', 'settings'];
+const VIEWS = ['loading', 'selection', 'live', 'settings', 'fixtures', 'history', 'squad'];
+const TAB_VIEWS = ['selection', 'fixtures', 'history', 'squad'];
+const SHEETS = ['picker', 'share', 'fixture-sheet', 'player-sheet'];
 
 const state = {
   view: 'loading',
   settings: { ...DEFAULT_SETTINGS },
   team: null,
   players: [],
+  fixtures: [],
   match: null,
   lastSelection: [],
   clock: createClock(),
@@ -45,10 +51,17 @@ function makeClock(debug) {
 function show(view) {
   state.view = view;
   for (const v of VIEWS) $(`view-${v}`).hidden = v !== view;
-  $('picker').hidden = true;
-  $('share').hidden = true;
+  for (const s of SHEETS) $(s).hidden = true;
+  $('tabbar').hidden = !TAB_VIEWS.includes(view) || Boolean(state.match);
+  for (const b of $('tabbar').querySelectorAll('button')) {
+    if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
+    else b.removeAttribute('aria-current');
+  }
   if (view === 'selection') renderSelection();
   if (view === 'settings') renderSettings();
+  if (view === 'fixtures') renderFixtures();
+  if (view === 'history') renderHistory();
+  if (view === 'squad') renderTeam();
   if (view === 'live') {
     invalidateLive();
     tick();
@@ -63,7 +76,8 @@ function commit(match) {
   renderUpdateBanner();
 }
 
-async function startMatch({ opponent, venue, selection }) {
+async function startMatch({ opponent, venue, selection, fixtureId = null }) {
+  const fixture = fixtureId ? state.fixtures.find((f) => f.id === fixtureId) : null;
   const debug = debugFromSettings();
   state.clock = makeClock(debug);
   const { quarterCount, quarterMs, reminderAtMs } = state.settings;
@@ -75,9 +89,11 @@ async function startMatch({ opponent, venue, selection }) {
     config: { quarterCount, quarterMs, reminderAtMs },
     debug,
   });
+  if (fixture) Object.assign(match, { fixtureId: fixture.id, kickoffAt: fixture.kickoffAt });
   commit(match);
   state.lastSelection = selection;
   await Promise.all([store.setMeta('activeMatchId', match.id), store.setMeta('lastSelection', selection)]);
+  if (fixture) await deleteFixture(fixture.id);
   store.requestPersistence().then((p) => (state.persistence = p));
   log('match created', { debug: debug ? debug.speed : 1, venue: match.venue });
   show('live');
@@ -178,6 +194,37 @@ async function importSquadText(text) {
 async function saveSettings(patch) {
   state.settings = { ...state.settings, ...patch };
   await store.setMeta('settings', state.settings);
+}
+
+async function savePlayer(player) {
+  await store.savePlayer(player);
+  state.players = await store.getPlayers();
+  log('player saved', { active: player.active });
+}
+
+async function saveTeamName(name) {
+  await store.saveTeam(name);
+  state.team = { name };
+}
+
+async function saveFixture(fixture) {
+  await store.saveFixture(fixture);
+  state.fixtures = [...state.fixtures.filter((f) => f.id !== fixture.id), fixture];
+}
+
+async function deleteFixture(id) {
+  await store.deleteFixture(id);
+  state.fixtures = state.fixtures.filter((f) => f.id !== id);
+}
+
+function prepareFixture(fixture) {
+  loadFixture(fixture);
+  show('selection');
+}
+
+async function deleteMatch(id) {
+  await store.deleteMatch(id);
+  log('match deleted');
 }
 
 async function setDebugSpeed(speed) {
@@ -307,6 +354,14 @@ const app = {
   saveSettings,
   setDebugSpeed,
   testAlert,
+  savePlayer,
+  saveTeamName,
+  saveFixture,
+  deleteFixture,
+  prepareFixture,
+  listMatches: () => store.listMatches(),
+  getMatch: (id) => store.getMatch(id),
+  deleteMatch,
 };
 
 async function boot() {
@@ -317,6 +372,10 @@ async function boot() {
   initGoalPicker(app);
   initSettings(app);
   initShare(app);
+  initFixtures(app);
+  initHistory(app);
+  initTeam(app);
+  for (const b of $('tabbar').querySelectorAll('button')) b.addEventListener('click', () => show(b.dataset.view));
   await loadLog();
   log('boot', { version: VERSION });
 
@@ -324,6 +383,7 @@ async function boot() {
   state.team = await store.getMeta('team', null);
   state.players = await store.getPlayers();
   state.lastSelection = await store.getMeta('lastSelection', []);
+  state.fixtures = await store.getFixtures();
   if (!state.players.length) await tryLoadLocalSquad();
 
   const activeId = await store.getMeta('activeMatchId', null);

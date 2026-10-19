@@ -1,8 +1,8 @@
-// IndexedDB persistence. Stores: players (keyPath id), matches (keyPath id), meta (key → value).
+// IndexedDB persistence. Stores: players, matches, fixtures (keyPath id), meta (key → value).
 import { openDB } from '../vendor/idb.js';
 
 const DB_NAME = 'football-manager';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise;
 
@@ -15,6 +15,9 @@ function db() {
         matches.createIndex('createdAt', 'createdAt');
         matches.createIndex('status', 'status');
         d.createObjectStore('meta');
+      }
+      if (oldVersion < 2) {
+        d.createObjectStore('fixtures', { keyPath: 'id' }).createIndex('kickoffAt', 'kickoffAt');
       }
     },
   });
@@ -49,6 +52,18 @@ export async function importSquad({ team, players }) {
   await tx.done;
 }
 
+export async function savePlayer(player) {
+  await (await db()).put('players', player);
+}
+
+export async function saveTeam(name) {
+  await (await db()).put('meta', { name }, 'team');
+}
+
+export async function listMatches() {
+  return (await db()).getAllFromIndex('matches', 'createdAt');
+}
+
 export async function getMatch(id) {
   return (await db()).get('matches', id);
 }
@@ -59,6 +74,18 @@ export async function saveMatch(match) {
 
 export async function deleteMatch(id) {
   await (await db()).delete('matches', id);
+}
+
+export async function getFixtures() {
+  return (await db()).getAll('fixtures');
+}
+
+export async function saveFixture(fixture) {
+  await (await db()).put('fixtures', fixture);
+}
+
+export async function deleteFixture(id) {
+  await (await db()).delete('fixtures', id);
 }
 
 export async function requestPersistence() {

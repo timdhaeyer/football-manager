@@ -35,6 +35,10 @@
       </header>
       <div class="scroll">
         <p id="sel-team" class="team-name"></p>
+        <div id="sel-plan" class="plan-banner" hidden>
+          <span id="sel-plan-text"></span>
+          <button id="sel-plan-btn" class="btn btn-small btn-primary">Load</button>
+        </div>
         <label class="field">
           <span>Opponent</span>
           <input id="sel-opponent" type="text" autocomplete="off" autocapitalize="words" placeholder="Optional">
@@ -59,6 +63,46 @@
       </div>
       <footer class="actions">
         <button id="sel-start" class="btn btn-primary btn-xl">Start match</button>
+      </footer>
+    </section>
+
+    <!-- Calendar: planned matches -->
+    <section id="view-fixtures" class="view" hidden>
+      <header class="bar"><h1>Calendar</h1></header>
+      <div class="scroll">
+        <ul id="fix-list" class="rows"></ul>
+        <p id="fix-empty" class="muted empty">No planned matches.</p>
+        <h3 id="fix-past-title" hidden>Past, never started</h3>
+        <ul id="fix-past" class="rows"></ul>
+      </div>
+      <footer class="actions">
+        <button id="fix-add" class="btn btn-primary">+ Plan match</button>
+      </footer>
+    </section>
+
+    <!-- Match history -->
+    <section id="view-history" class="view" hidden>
+      <header class="bar"><h1>History</h1></header>
+      <div class="scroll">
+        <ul id="hist-list" class="rows"></ul>
+        <p id="hist-empty" class="muted empty" hidden>No finished matches yet.</p>
+      </div>
+    </section>
+
+    <!-- Squad management -->
+    <section id="view-squad" class="view" hidden>
+      <header class="bar"><h1>Squad</h1></header>
+      <div class="scroll">
+        <label class="field"><span>Team name</span><input id="squad-team" type="text" autocomplete="off" autocapitalize="words"></label>
+        <p id="squad-count" class="muted"></p>
+        <ul id="squad-active" class="player-grid"></ul>
+        <details id="squad-inactive-wrap" class="inactive" hidden>
+          <summary id="squad-inactive-title"></summary>
+          <ul id="squad-inactive" class="player-grid"></ul>
+        </details>
+      </div>
+      <footer class="actions">
+        <button id="squad-add" class="btn btn-primary">+ Add player</button>
       </footer>
     </section>
 
@@ -111,6 +155,7 @@
         <section class="card">
           <h2>Squad</h2>
           <p id="set-squad-summary" class="muted"></p>
+          <button id="set-manage-squad" class="btn btn-secondary">Manage squad</button>
           <label class="btn btn-secondary file-btn">Import squad file…<input id="set-squad-file" type="file" accept=".json,application/json,text/plain" hidden></label>
           <label class="field"><span>…or paste JSON / one player per line ("7 Lars")</span><textarea id="set-squad-text" rows="5"></textarea></label>
           <button id="set-squad-paste" class="btn btn-secondary">Import pasted squad</button>
@@ -143,6 +188,13 @@
         </section>
       </div>
     </section>
+
+    <nav id="tabbar" class="tabbar" hidden>
+      <button type="button" data-view="selection">Match</button>
+      <button type="button" data-view="fixtures">Calendar</button>
+      <button type="button" data-view="history">History</button>
+      <button type="button" data-view="squad">Squad</button>
+    </nav>
   </main>
 
   <!-- Goal picker -->
@@ -169,7 +221,57 @@
       </div>
       <textarea id="share-text" class="share-text" rows="7" readonly></textarea>
       <button id="share-copy" class="btn btn-primary">Copy text</button>
+      <button id="share-delete" class="btn btn-danger" hidden>Delete match</button>
       <button id="share-close" class="btn btn-small btn-cancel">Close</button>
+    </div>
+  </div>
+
+  <!-- Planned match editor -->
+  <div id="fixture-sheet" class="sheet" hidden>
+    <div class="sheet-body">
+      <h2 id="fx-title">Plan match</h2>
+      <label class="field"><span>Opponent</span><input id="fx-opponent" type="text" autocomplete="off" autocapitalize="words"></label>
+      <div class="field">
+        <span>Venue</span>
+        <div class="segmented" role="group" aria-label="Venue">
+          <button id="fx-home" class="btn" type="button" aria-pressed="true">Home</button>
+          <button id="fx-away" class="btn" type="button" aria-pressed="false">Away</button>
+        </div>
+      </div>
+      <div class="row">
+        <label class="field grow"><span>Date</span><input id="fx-date" type="date"></label>
+        <label class="field grow"><span>Kick-off</span><input id="fx-time" type="time" step="300"></label>
+      </div>
+      <div class="sel-tools">
+        <span id="fx-count" class="muted"></span>
+        <button id="fx-all" class="btn btn-small" type="button">All</button>
+        <button id="fx-none" class="btn btn-small" type="button">None</button>
+      </div>
+      <ul id="fx-players" class="player-grid"></ul>
+      <p id="fx-error" class="error" hidden></p>
+      <button id="fx-save" class="btn btn-primary">Save</button>
+      <button id="fx-delete" class="btn btn-danger">Delete</button>
+      <button id="fx-cancel" class="btn btn-small btn-cancel">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Player editor -->
+  <div id="player-sheet" class="sheet" hidden>
+    <div class="sheet-body">
+      <h2 id="pl-title">Player</h2>
+      <label class="field"><span>Name</span><input id="pl-name" type="text" autocomplete="off" autocapitalize="words"></label>
+      <label class="field"><span>Shirt number (optional)</span><input id="pl-number" type="number" inputmode="numeric" min="0" max="99"></label>
+      <div class="field">
+        <span>Status</span>
+        <div class="segmented" role="group" aria-label="Status">
+          <button id="pl-active" class="btn" type="button" aria-pressed="true">Active</button>
+          <button id="pl-inactive" class="btn" type="button" aria-pressed="false">Inactive</button>
+        </div>
+      </div>
+      <p class="muted">Inactive players are hidden from match selection but stay in the match history.</p>
+      <p id="pl-error" class="error" hidden></p>
+      <button id="pl-save" class="btn btn-primary">Save</button>
+      <button id="pl-cancel" class="btn btn-small btn-cancel">Cancel</button>
     </div>
   </div>
 

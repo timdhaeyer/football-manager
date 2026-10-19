@@ -1,27 +1,41 @@
 // Share sheet: result card image + Dutch text summary for the parents (e.g. WhatsApp group).
 import { matchSummaryNl, summaryModel } from '../core/summary.js';
 import { log } from '../platform/log.js';
-import { $, toast } from './dom.js';
+import { $, toast, twoStep } from './dom.js';
 import { canvasToBlob, renderResultCard } from './result-card.js';
 
 let app;
 let cardFile = null;
 let cardUrl = null;
 let renderSeq = 0;
+let onDelete = null;
+let deleteButton;
 
 export function initShare(appRef) {
   app = appRef;
-  $('btn-share').addEventListener('click', openShare);
+  $('btn-share').addEventListener('click', () => openShare());
   $('share-close').addEventListener('click', close);
   $('share').addEventListener('click', (e) => { if (e.target.id === 'share') close(); });
   $('share-copy').addEventListener('click', copy);
   $('share-native').addEventListener('click', shareText);
   $('share-image').addEventListener('click', shareImage);
+  deleteButton = twoStep($('share-delete'), {
+    confirmLabel: 'Tap again to delete',
+    onConfirm: () => {
+      const fn = onDelete;
+      close();
+      fn?.();
+    },
+  });
 }
 
-export function openShare() {
-  const { match, team } = app.state;
+// From history: pass the stored match and an onDelete handler.
+export function openShare(match = app.state.match, options = {}) {
+  const { team } = app.state;
   if (!match) return;
+  onDelete = options.onDelete ?? null;
+  deleteButton.disarm();
+  $('share-delete').hidden = !onDelete;
   $('share-text').value = matchSummaryNl(match, team?.name);
   $('share-native').hidden = typeof navigator.share !== 'function';
   $('toast').hidden = true;
